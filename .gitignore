@@ -1,3 +1,6 @@
 *.swp
 .gradle
 /.idea/
+/.vagrant/
+*.log
+/compiler/target/
