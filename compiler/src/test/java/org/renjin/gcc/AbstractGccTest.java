@@ -19,12 +19,17 @@
 package org.renjin.gcc;
 
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.renjin.gcc.gimple.GimpleCompilationUnit;
 import org.renjin.repackaged.guava.base.Strings;
 import org.renjin.repackaged.guava.collect.Iterables;
 import org.renjin.repackaged.guava.collect.Lists;
 import org.renjin.repackaged.guava.io.Files;
+import org.renjin.repackaged.guava.io.MoreFiles;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,12 +49,10 @@ public abstract class AbstractGccTest {
 
   protected File outputDir;
   protected URLClassLoader testClassLoader;
-  private Gcc gcc;
+  private static Gcc gcc;
 
-  @Before
-  public void setUp() throws IOException {
-    GimpleCompiler.TRACE = true;
-
+  @BeforeClass
+  public static void setupGcc() throws IOException {
     File workingDir = Files.createTempDir();
 
     gcc = new Gcc(workingDir);
@@ -62,11 +65,21 @@ public abstract class AbstractGccTest {
     }
     gcc.setDebug(true);
     gcc.setGimpleOutputDir(workingDir);
+  }
+
+  @Before
+  public void setUp() throws IOException {
+    GimpleCompiler.TRACE = true;
 
     outputDir = Files.createTempDir();
     testClassLoader = new URLClassLoader(new URL[] { outputDir.toURI().toURL() }, getClass().getClassLoader());
   }
-  
+
+  @After
+  public void tearDown() throws IOException {
+    MoreFiles.deleteRecursively(outputDir.toPath());
+  }
+
   public static final String PACKAGE_NAME = "org.renjin.gcc";
 
   protected Integer call(Class<?> clazz, String methodName, double x) throws Exception {
