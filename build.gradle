@@ -19,6 +19,9 @@ subprojects {
         maven {
             url 'http://mvn.slimjars.com'
         }
+        maven {
+            url "https://nexus.bedatadriven.com/content/groups/public"
+        }
         mavenCentral()
     }
 
