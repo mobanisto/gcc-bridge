@@ -1,0 +1,4 @@
+include 'compiler', 'runtime', 'cli'
+project(':compiler').name = 'gcc-bridge-compiler'
+project(':runtime').name = 'gcc-bridge-runtime'
+project(':cli').name = 'gcc-bridge-cli'
