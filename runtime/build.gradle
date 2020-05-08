@@ -5,4 +5,5 @@ if (project.hasProperty("topobyte")) {
 
 dependencies {
     testCompile 'junit:junit:4.11'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
