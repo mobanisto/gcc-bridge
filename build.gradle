@@ -37,3 +37,7 @@ subprojects {
         archives sourcesJar
     }
 }
+
+ext {
+    gccBridgePlugin = "$projectDir/gcc-bridge/compiler/build/bridge.so"
+}
