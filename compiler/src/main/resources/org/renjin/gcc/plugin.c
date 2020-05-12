@@ -1184,8 +1184,7 @@ static void finish_unit_callback (void *gcc_data, void *user_data)
 
   json_array_field("recordTypes");
   for(i=0;i<record_type_count;++i) {
-    // TODO: make this work again
-    //dump_record_type_decl(record_types[i]);
+    dump_record_type_decl(record_types[i]);
   }
   json_end_array();
 
