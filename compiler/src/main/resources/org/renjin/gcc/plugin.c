@@ -1157,6 +1157,7 @@ static void dump_aliases() {
 
   struct cgraph_node *n;
 
+  // TODO: make this work again
   FOR_EACH_DEFINED_FUNCTION(n) {
 //    if (DECL_ASSEMBLER_NAME_SET_P (n->decl)) {
 //      if(n->alias && n->thunk.alias) {
@@ -1183,6 +1184,7 @@ static void finish_unit_callback (void *gcc_data, void *user_data)
 
   json_array_field("recordTypes");
   for(i=0;i<record_type_count;++i) {
+    // TODO: make this work again
     //dump_record_type_decl(record_types[i]);
   }
   json_end_array();
