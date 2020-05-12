@@ -61,6 +61,7 @@ int json_needs_comma = 0;
 #define JSON_ARRAY  1
 #define JSON_OBJECT  2
 
+#define TRACE_GCC_BRIDGE 1
 
 #ifdef TRACE_GCC_BRIDGE
 #define TRACE(...) printf(__VA_ARGS__)
