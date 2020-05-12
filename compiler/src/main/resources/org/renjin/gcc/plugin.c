@@ -1157,17 +1157,16 @@ static void dump_aliases() {
 
   struct cgraph_node *n;
 
-  // TODO: make this work again
   FOR_EACH_DEFINED_FUNCTION(n) {
-//    if (DECL_ASSEMBLER_NAME_SET_P (n->decl)) {
-//      if(n->alias && n->thunk.alias) {
-//          json_start_object();
-//          json_string_field("alias",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->decl)));
-//          json_string_field("definition",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->thunk.alias)));
-//          json_bool_field("public", TREE_PUBLIC(n->decl));
-//          json_end_object();
-//      }
-//    }
+    if (DECL_ASSEMBLER_NAME_SET_P (n->symbol.decl)) {
+      if(n->alias && n->thunk.alias) {
+          json_start_object();
+          json_string_field("alias",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->symbol.decl)));
+          json_string_field("definition",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->thunk.alias)));
+          json_bool_field("public", TREE_PUBLIC(n->symbol.decl));
+          json_end_object();
+      }
+    }
   }
 
   json_end_array();
