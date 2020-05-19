@@ -184,7 +184,7 @@ public class Gcc {
    */
   private String callGcc(List<String> arguments) throws IOException {
     List<String> command = Lists.newArrayList();
-    command.add("gcc-4.7");
+    command.add("gcc-4.8");
     command.addAll(arguments);
 
     System.err.println("EXECUTING: " + Joiner.on(" ").join(arguments));
@@ -201,6 +201,8 @@ public class Gcc {
     } catch (InterruptedException e) {
       throw new GccException("Compiler interrupted");
     }
+
+    System.out.print(outputCollector.getOutput());
 
     if (gcc.exitValue() != 0) {
 
