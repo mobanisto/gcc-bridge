@@ -12,7 +12,7 @@ public class CompileToGimple {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.out.println("usage: Compile <output> <file...>");
+            System.out.println("usage: CompileToGimple <output> <file...>");
             System.exit(1);
         }
 
