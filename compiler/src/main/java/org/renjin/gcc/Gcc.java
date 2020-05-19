@@ -202,7 +202,7 @@ public class Gcc {
       throw new GccException("Compiler interrupted");
     }
 
-    System.out.print(outputCollector.getOutput());
+    // System.out.print(outputCollector.getOutput());
 
     if (gcc.exitValue() != 0) {
 
