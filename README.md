@@ -23,6 +23,10 @@ Alternatively, run this directly:
     -fno-rtti -O2 compiler/src/main/resources/org/renjin/gcc/plugin.c
     -lstdc++ -shared-libgcc -o plugin.so
 
+To build the executables, run this:
+
+    ./gradlew createRuntime
+
 ## Usage
 
 There are a number of executables available. This section explains basic usage
