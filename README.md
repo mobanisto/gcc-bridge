@@ -13,3 +13,22 @@ Alternatively, run this directly:
     gcc-4.8 -shared -xc++ -I `gcc-4.8 -print-file-name=plugin`/include -fPIC
     -fno-rtti -O2 compiler/src/main/resources/org/renjin/gcc/plugin.c
     -lstdc++ -shared-libgcc -o plugin.so
+
+# Usage
+
+There are a number of executables available. This section explains basic usage
+of them.
+
+To compile a number of C source files to Gimple, run this:
+
+    ./scripts/compile-to-gimple gimple /path/to/some/*.c
+
+This will create a directory `gimple` and generate a number of `*.s` and
+`*.c.gimple` files for each `*.c` source file.
+
+You can then compile the `*.c.gimple` files to `*.class`. To do so, run this:
+
+    ./scripts/compile-gimple compiled logs gimple/*.c.gimple
+
+This will create directories `compiled` and `logs`. Compiled `*.class` files go
+into the former and some logging goes into the latter.
