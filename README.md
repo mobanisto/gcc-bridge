@@ -1,4 +1,13 @@
-# Port of the GCC-Bridge plugin to GCC 4.8
+# Standalone GCC-Bridge
+
+Differences to the original project:
+* This project contains only the `compiler` and `runtime` modules from
+  [Renjin](https://www.renjin.org/)'s [gcc-bridge
+  module](https://github.com/bedatadriven/renjin/tree/master/tools/gcc-bridge)
+* The project has been refactored to support GCC 4.8 instead of GCC 4.7
+* It contains executables for running the GCC plugin from the command line
+
+## Setup
 
 On Ubuntu, install the following packages:
 
@@ -14,7 +23,7 @@ Alternatively, run this directly:
     -fno-rtti -O2 compiler/src/main/resources/org/renjin/gcc/plugin.c
     -lstdc++ -shared-libgcc -o plugin.so
 
-# Usage
+## Usage
 
 There are a number of executables available. This section explains basic usage
 of them.
