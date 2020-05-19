@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Compile {
+public class CompileToGimple {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
