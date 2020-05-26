@@ -375,8 +375,7 @@ static void dump_record_type_decl(tree type) {
           }
           json_int_field("offset", int_bit_position(field));              
           if(DECL_SIZE(field)) {
-            // TODO
-            //json_int_field("size", tree_low_cst (DECL_SIZE (field), 1));
+            json_int_field("size", tree_to_uhwi (DECL_SIZE (field)));
           } else {
             json_int_field("size", 0); 
           }        
@@ -553,7 +552,7 @@ static void dump_op(tree op) {
         TRACE("field_name = %s\n", IDENTIFIER_POINTER(DECL_NAME(op)));
       }
       json_int_field("offset", int_bit_position(op));
-      //json_int_field("size", tree_low_cst (DECL_SIZE (op), 1));
+      json_int_field("size", tree_to_uhwi (DECL_SIZE (op)));
       break;
       
     case CONST_DECL:
