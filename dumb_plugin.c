@@ -374,7 +374,8 @@ static void dump_record_type_decl(tree type) {
           }
           json_int_field("offset", int_bit_position(field));              
           if(DECL_SIZE(field)) {
-            json_int_field("size", tree_low_cst (DECL_SIZE (field), 1));
+            // TODO
+            //json_int_field("size", tree_low_cst (DECL_SIZE (field), 1));
           } else {
             json_int_field("size", 0); 
           }        
@@ -490,7 +491,8 @@ void dump_real_cst(tree op) {
   memset(buf, 0, sizeof(long)*4);
 
   REAL_VALUE_TYPE r = TREE_REAL_CST(op);
-  real_to_target_fmt (buf, &r, &ieee_double_format);
+  // TODO
+  //real_to_target_fmt (buf, &r, &ieee_double_format);
 
   json_field("bits");
   fprintf(json_f, "\"%08x%08x\"", (int)buf[1], (int)buf[0]);
@@ -550,7 +552,7 @@ static void dump_op(tree op) {
         TRACE("field_name = %s\n", IDENTIFIER_POINTER(DECL_NAME(op)));
       }
       json_int_field("offset", int_bit_position(op));
-      json_int_field("size", tree_low_cst (DECL_SIZE (op), 1));
+      //json_int_field("size", tree_low_cst (DECL_SIZE (op), 1));
       break;
       
     case CONST_DECL:
