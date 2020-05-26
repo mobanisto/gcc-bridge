@@ -491,8 +491,7 @@ void dump_real_cst(tree op) {
   memset(buf, 0, sizeof(long)*4);
 
   REAL_VALUE_TYPE r = TREE_REAL_CST(op);
-  // TODO
-  //real_to_target_fmt (buf, &r, &ieee_double_format);
+  real_to_target (buf, &r, &ieee_double_format);
 
   json_field("bits");
   fprintf(json_f, "\"%08x%08x\"", (int)buf[1], (int)buf[0]);
