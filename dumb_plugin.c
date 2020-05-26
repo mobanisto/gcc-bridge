@@ -1232,80 +1232,12 @@ public:
 
 };
 
-}
-
-// SNIP
-
-/* Callback function to invoke after GCC finishes parsing a struct.  */
-
-void
-handle_struct (void *event_data, void *data)
-{
-  tree type = (tree) event_data;
-  warning (0, G_("Process struct %s"),
-           IDENTIFIER_POINTER (DECL_NAME (TYPE_NAME (type))));
-}
-
-/* Callback function to invoke before the function body is genericized.  */ 
-
-void
-handle_pre_generic (void *event_data, void *data)
-{
-  tree fndecl = (tree) event_data;
-  warning (0, G_("Before genericizing function %s"),
-           IDENTIFIER_POINTER (DECL_NAME (fndecl)));
-}
-
-/* Callback function to invoke after GCC finishes the compilation unit.  */
-
-void
-handle_end_of_compilation_unit (void *event_data, void *data)
-{
-  warning (0, G_("End of compilation unit"));
-}
-
-
-namespace {
-
-const pass_data pass_data_dumb_plugin_example =
-{
-  GIMPLE_PASS, /* type */
-  "dumb_plugin_example", /* name */
-  OPTGROUP_NONE, /* optinfo_flags */
-  TV_NONE, /* tv_id */
-  PROP_cfg, /* properties_required */
-  0, /* properties_provided */
-  0, /* properties_destroyed */
-  0, /* todo_flags_start */
-  0, /* todo_flags_finish */
-};
-
-class pass_dumb_plugin_example : public gimple_opt_pass
-{
-public:
-  pass_dumb_plugin_example(gcc::context *ctxt)
-    : gimple_opt_pass(pass_data_dumb_plugin_example, ctxt)
-  {}
-
-  /* opt_pass methods: */
-  virtual unsigned int execute (function *);
-
-}; // class pass_dumb_plugin_example
-
-unsigned int
-pass_dumb_plugin_example::execute (function *)
-{
-  warning (0, G_("Analyze function %s"),
-           IDENTIFIER_POINTER (DECL_NAME (current_function_decl)));
-  return 0;
-}
-
 } // anon namespace
 
 static gimple_opt_pass *
-make_pass_dumb_plugin_example (gcc::context *ctxt)
+make_pass_dump_plugin (gcc::context *ctxt)
 {
-  return new pass_dumb_plugin_example (ctxt);
+  return new pass_dump_functions (ctxt);
 }
 
 /* Initialization function that GCC calls. This plugin takes an argument
@@ -1324,7 +1256,7 @@ plugin_init (struct plugin_name_args *plugin_info,
   int ref_instance_number = 0;
   int i;
 
-  pass_info.pass = make_pass_dumb_plugin_example (g);
+  pass_info.pass = make_pass_dump_plugin (g);
   pass_info.reference_pass_name = "cfg";
   pass_info.ref_pass_instance_number = 1;
   pass_info.pos_op = PASS_POS_INSERT_AFTER;
