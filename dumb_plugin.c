@@ -424,9 +424,9 @@ static void dump_constructor(tree node) {
 }
 
 static void dump_type(tree type) {
-  TRACE("dump_type: entering: %s\n", tree_code_name[TREE_CODE(type)]);
+  TRACE("dump_type: entering: %s\n", get_tree_code_name(TREE_CODE(type)));
   json_start_object();
-  json_string_field("type", tree_code_name[TREE_CODE(type)]);
+  json_string_field("type", get_tree_code_name(TREE_CODE(type)));
     
   if(TYPE_SIZE(type)) {
     json_int_field("size", TREE_INT_CST_LOW(TYPE_SIZE(type)));
@@ -481,7 +481,7 @@ static void dump_type(tree type) {
     
   }
   json_end_object();
-  TRACE("dump_type: exiting: %s\n", tree_code_name[TREE_CODE(type)]);
+  TRACE("dump_type: exiting: %s\n", get_tree_code_name(TREE_CODE(type)));
 }
 
 void dump_real_cst(tree op) {
@@ -511,13 +511,13 @@ static void dump_op(tree op) {
   
   
     if(TREE_CODE(op)) {
-      TRACE("dump_op: code = %s\n", tree_code_name[TREE_CODE(op)]);
+      TRACE("dump_op: code = %s\n", get_tree_code_name(TREE_CODE(op)));
     } else {
       TRACE("dump_op: TREE_CODE(op) == NULL\n");
     }
     
     json_start_object();
-    json_string_field("code", tree_code_name[TREE_CODE(op)]);
+    json_string_field("code", get_tree_code_name(TREE_CODE(op)));
     
     if(TREE_CODE(op) != TREE_LIST) {
         json_field("type");
@@ -696,7 +696,7 @@ static void dump_assignment(gimple stmt) {
   json_string_field("type", "assign");
   dump_srcref(stmt);
 
-  json_string_field("operator", tree_code_name[gimple_assign_rhs_code(stmt)]);
+  json_string_field("operator", get_tree_code_name(gimple_assign_rhs_code(stmt)));
 
 
   json_field("lhs");
@@ -720,7 +720,7 @@ static void dump_cond(basic_block bb, gimple stmt) {
   json_string_field("type", "conditional");
   dump_srcref(stmt);
 
-  json_string_field("operator", tree_code_name[gimple_assign_rhs_code(stmt)]);
+  json_string_field("operator", get_tree_code_name(gimple_assign_rhs_code(stmt)));
   
   dump_ops(stmt);
       
