@@ -670,7 +670,7 @@ static void dump_op(tree op) {
   TRACE("dump_op: exiting\n");
 }
 
-static void dump_ops(gimple stmt) {
+static void dump_ops(gimple * stmt) {
   int numops = gimple_num_ops(stmt);
   if(numops > 0) {
     json_array_field("operands");
@@ -685,7 +685,7 @@ static void dump_ops(gimple stmt) {
   }
 }
 
-static void dump_srcref(gimple stmt) {
+static void dump_srcref(gimple * stmt) {
   json_int_field("line", gimple_lineno(stmt));
 
   if(gimple_filename(stmt)) {
@@ -693,7 +693,7 @@ static void dump_srcref(gimple stmt) {
   }
 }
 
-static void dump_assignment(gimple stmt) {
+static void dump_assignment(gimple * stmt) {
   json_start_object();
   json_string_field("type", "assign");
   dump_srcref(stmt);
@@ -716,7 +716,7 @@ static void dump_assignment(gimple stmt) {
   json_end_object();
 }
 
-static void dump_cond(basic_block bb, gimple stmt) {
+static void dump_cond(basic_block bb, gimple * stmt) {
 
   json_start_object();
   json_string_field("type", "conditional");
@@ -734,7 +734,7 @@ static void dump_cond(basic_block bb, gimple stmt) {
   json_end_object();
  }
 
-static void dump_nop(gimple stmt) {
+static void dump_nop(gimple * stmt) {
   json_start_object();
   json_string_field("type", "nop");
   dump_srcref(stmt);
@@ -742,7 +742,7 @@ static void dump_nop(gimple stmt) {
   json_end_object();
 }
 
-static void dump_predict(gimple stmt) {
+static void dump_predict(gimple * stmt) {
   json_start_object();
   json_string_field("type", "predict");
   dump_srcref(stmt);
@@ -751,34 +751,37 @@ static void dump_predict(gimple stmt) {
   json_end_object();
 }
 
-static void dump_resx(basic_block bb, gimple stmt) {
+static void dump_resx(basic_block bb, gimple * stmt) {
   json_start_object();
   json_string_field("type", "resx");
   dump_srcref(stmt);
-  json_int_field("region", gimple_resx_region(stmt));
+  gresx *resx_stmt = as_a <gresx *> (stmt);
+  json_int_field("region", gimple_resx_region(resx_stmt));
   json_end_object();
 }
-static void dump_eh_dispatch(gimple stmt) {
+static void dump_eh_dispatch(gimple * stmt) {
   json_start_object();
   json_string_field("type", "eh_dispatch");
   dump_srcref(stmt);
-  json_int_field("region", gimple_eh_dispatch_region(stmt));
+  geh_dispatch *eh_dispatch_stmt = as_a <geh_dispatch *> (stmt);
+  json_int_field("region", gimple_eh_dispatch_region(eh_dispatch_stmt));
   json_end_object();
 }
 
-static void dump_label(gimple stmt) {
+static void dump_label(gimple * stmt) {
   json_start_object();
   json_string_field("type", "label");
   dump_srcref(stmt);
   json_end_object();
 }
 
-static void dump_return(gimple stmt) {
+static void dump_return(gimple * stmt) {
   json_start_object();
   json_string_field("type", "return");
   dump_srcref(stmt);
 
-  tree retval = gimple_return_retval(stmt);
+  greturn *return_stmt = as_a <greturn *> (stmt);
+  tree retval = gimple_return_retval(return_stmt);
   if(retval) {
     json_field("value");
     dump_op(retval);
@@ -786,7 +789,7 @@ static void dump_return(gimple stmt) {
   json_end_object();
 }
 
-static void dump_call(gimple stmt) {
+static void dump_call(gimple * stmt) {
   json_start_object();
   json_string_field("type", "call");
   dump_srcref(stmt);
@@ -809,7 +812,7 @@ static void dump_call(gimple stmt) {
   json_end_object();
 }
 
-static void dump_switch(gimple stmt) {
+static void dump_switch(gimple * stmt) {
 
   json_start_object();
 
@@ -864,7 +867,7 @@ static void dump_switch(gimple stmt) {
 
 }
 
-static void dump_statement(basic_block bb, gimple stmt) {
+static void dump_statement(basic_block bb, gimple * stmt) {
   TRACE("dump_statement: entering\n");
   
   switch(gimple_code(stmt)) {
