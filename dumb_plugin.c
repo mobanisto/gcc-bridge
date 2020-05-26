@@ -41,6 +41,7 @@
 
 #include "tree.h"
 #include "gimple.h"
+#include "gimple-iterator.h"
 #include "diagnostic.h"
 #include "tree-cfg.h"
 #include "tree-pass.h"
