@@ -1273,14 +1273,13 @@ plugin_init (struct plugin_name_args *plugin_info,
     json_f = fopen(jsonfile, "w");
   }
 
-  register_callback (plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &pass_info);
+  /* Register this new pass with GCC */
+  register_callback (plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL,
+                     &pass_info);
 
   //register_callback (plugin_name, PLUGIN_FINISH_TYPE, dump_type_decl, NULL);
 
-  register_callback (plugin_name, PLUGIN_PRE_GENERICIZE,
-                     start_unit_callback, NULL);
-
-  register_callback (plugin_name, PLUGIN_FINISH_UNIT,
-                     finish_unit_callback, NULL);
+  register_callback ("start_unit", PLUGIN_START_UNIT, start_unit_callback, NULL);
+  register_callback ("finish_unit", PLUGIN_FINISH_UNIT, finish_unit_callback, NULL);
   return 0;
 }
