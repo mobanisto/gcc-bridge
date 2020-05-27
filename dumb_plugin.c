@@ -1239,9 +1239,7 @@ make_pass_dump_plugin (gcc::context *ctxt)
   return new pass_dump_functions (ctxt);
 }
 
-/* Initialization function that GCC calls. This plugin takes an argument
-   that specifies the name of the reference pass and an instance number,
-   both of which determine where the plugin pass should be inserted.  */
+/* Plugin initialization.  */
 
 int
 plugin_init (struct plugin_name_args *plugin_info,
@@ -1251,9 +1249,6 @@ plugin_init (struct plugin_name_args *plugin_info,
   const char *plugin_name = plugin_info->base_name;
   int argc = plugin_info->argc;
   struct plugin_argument *argv = plugin_info->argv;
-  char *ref_pass_name = NULL;
-  int ref_instance_number = 0;
-  int i;
 
   pass_info.pass = make_pass_dump_plugin (g);
   pass_info.reference_pass_name = "cfg";
@@ -1265,9 +1260,9 @@ plugin_init (struct plugin_name_args *plugin_info,
   json_f = NULL;
   
   int argi;
-  for(argi=0;argi!=plugin_info->argc;++argi) {
-    if(strcmp(plugin_info->argv[argi].key, "json-output-file") == 0) {
-      json_f = fopen(plugin_info->argv[argi].value, "w");
+  for(argi=0;argi!=argc;++argi) {
+    if(strcmp(argv[argi].key, "json-output-file") == 0) {
+      json_f = fopen(argv[argi].value, "w");
     } 
   }
 
