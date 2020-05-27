@@ -1219,7 +1219,6 @@ static struct pass_data dump_functions_pass_data =
     0,		          /* todo_flags_start */
     0		            /* todo_flags_finish */
 };
-// removed dump_function as execute value
 
 class pass_dump_functions : public gimple_opt_pass
 {
