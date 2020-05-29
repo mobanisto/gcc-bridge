@@ -11,7 +11,7 @@ Differences to the original project:
 
 On Ubuntu, install the following packages:
 
-    apt install openjdk-8-jdk make gcc-7 gcc-7-plugin-dev gfortran-7 g++-7 gcc-7.multilib g++-7-multilib unzip libz-dev linux-libc-dev:i386
+    apt install openjdk-8-jdk make gcc-7 gcc-7-plugin-dev gfortran-7 g++-7 gcc-7.multilib g++-7-multilib unzip libz-dev linux-libc-dev:i386 lib32stdc++-7-dev
 
 Run this to try compiling the plugin using Gradle:
 
