@@ -14,16 +14,68 @@ dependencies {
     testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
 
-task compilePlugin(type: Exec) {
+class PluginCompileTask extends Exec {
 
-    def sourceFile = 'src/main/resources/org/renjin/gcc/plugin.c'
-    def gcc = 'gcc-7'
+    @Input
+    String gcc;
 
-    inputs.file sourceFile
-    outputs.file gccBridgePlugin
+    @Input
+    String sourceFile;
 
-    commandLine 'sh', '-c', "${gcc} -shared -xc++ -I \
-        `${gcc} -print-file-name=plugin`/include -fPIC -fno-rtti -O2 ${sourceFile} \
-        -lstdc++ -shared-libgcc -o ${gccBridgePlugin}"
+    @Input
+    String pluginFile;
 
+    void setup() {
+        inputs.file sourceFile
+        outputs.file pluginFile
+
+        def gccFound = false;
+        try {
+            Runtime rt = Runtime.getRuntime();
+            Process proc = rt.exec("${gcc} -v");
+            proc.waitFor();
+            gccFound = true;
+        } catch (IOException e) {
+            // do nothing
+        }
+
+        if (gccFound) {
+            commandLine 'sh', '-c', "${gcc} -shared -xc++ -I \
+                `${gcc} -print-file-name=plugin`/include -fPIC -fno-rtti -O2 ${sourceFile} \
+                -lstdc++ -shared-libgcc -o ${pluginFile}"
+        } else {
+            commandLine 'echo', "ignoring ${gcc}"
+        }
+    }
+
+}
+
+task compilePlugin_4_7(type: PluginCompileTask) {
+    gcc = 'gcc-4.7'
+    sourceFile = 'src/main/resources/org/renjin/gcc/plugin-4.7.c'
+    pluginFile = gccBridgePlugin_4_7
+
+    setup()
+}
+
+task compilePlugin_4_8(type: PluginCompileTask) {
+    gcc = 'gcc-4.8'
+    sourceFile = 'src/main/resources/org/renjin/gcc/plugin-4.8.c'
+    pluginFile = gccBridgePlugin_4_8
+
+    setup()
+}
+
+task compilePlugin_7(type: PluginCompileTask) {
+    gcc = 'gcc-7'
+    sourceFile = 'src/main/resources/org/renjin/gcc/plugin-7.c'
+    pluginFile = gccBridgePlugin_7
+
+    setup()
+}
+
+task compilePlugin {
+    dependsOn(compilePlugin_4_7);
+    dependsOn(compilePlugin_4_8);
+    dependsOn(compilePlugin_7);
 }

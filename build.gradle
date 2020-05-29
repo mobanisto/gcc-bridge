@@ -39,5 +39,7 @@ subprojects {
 }
 
 ext {
-    gccBridgePlugin = "$projectDir/compiler/build/bridge.so"
+    gccBridgePlugin_4_7 = "$projectDir/compiler/build/bridge-4.7.so"
+    gccBridgePlugin_4_8 = "$projectDir/compiler/build/bridge-4.8.so"
+    gccBridgePlugin_7 = "$projectDir/compiler/build/bridge-7.so"
 }
