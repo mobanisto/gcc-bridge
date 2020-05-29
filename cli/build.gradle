@@ -2,6 +2,7 @@ dependencies {
     compile project(':gcc-bridge-compiler')
 
     compile 'de.topobyte:system-utils:0.0.1'
+    compile 'de.topobyte:commons-cli-helper:0.1.0'
 }
 
 task copyJars(type: Copy) {

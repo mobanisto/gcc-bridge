@@ -1,21 +1,34 @@
 package com.mobanisto.gcc.bridge;
 
+import de.topobyte.utilities.apache.commons.cli.commands.options.BasicExeOptions;
+import de.topobyte.utilities.apache.commons.cli.commands.options.ExeOptions;
+import de.topobyte.utilities.apache.commons.cli.commands.options.ExeOptionsFactory;
 import org.renjin.gcc.Gcc;
 import org.renjin.gcc.GimpleCompiler;
 import org.renjin.gcc.gimple.GimpleCompilationUnit;
-import org.renjin.repackaged.guava.collect.Lists;
 
-import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompileGimple {
+public class CompileGimple
+{
 
-    public static void main(String[] args) throws Exception {
+    public static ExeOptionsFactory OPTIONS_FACTORY = new ExeOptionsFactory()
+    {
+
+        @Override
+        public ExeOptions createOptions()
+        {
+            return new BasicExeOptions("[options] <output> <file...>");
+        }
+
+    };
+
+    public static void main(String name, String[] args) throws Exception
+    {
         if (args.length < 3) {
             System.out.println("usage: CompileGimple <output> <logs> <file...>");
             System.exit(1);
@@ -56,7 +69,8 @@ public class CompileGimple {
         compiler.compile(gcus);
     }
 
-    private static ClassLoader getLinkClassLoader() {
+    private static ClassLoader getLinkClassLoader()
+    {
         return Thread.currentThread().getContextClassLoader();
     }
 

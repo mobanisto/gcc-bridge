@@ -1,7 +1,0 @@
-#!/bin/bash
-
-DIR=$(dirname $0)
-CMD="$DIR/gcc-bridge.sh"
-CLASS="com.mobanisto.gcc.bridge.CompileToGimple"
-
-exec "$CMD" "$CLASS" "$@"

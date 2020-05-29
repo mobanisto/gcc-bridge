@@ -2,6 +2,6 @@
 
 DIR=$(dirname $0)
 CMD="$DIR/gcc-bridge.sh"
-CLASS="com.mobanisto.gcc.bridge.CompileGimple"
+CLASS="com.mobanisto.gcc.bridge.GccBridge"
 
 exec "$CMD" "$CLASS" "$@"
