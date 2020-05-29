@@ -25,7 +25,6 @@
 
 /* GCC header files.  */
 
-
 #include "gcc-plugin.h"
 #include "plugin.h"
 #include "plugin-version.h"
@@ -33,12 +32,14 @@
 
 #include "tree.h"
 #include "gimple.h"
+#include "gimple-iterator.h"
 #include "diagnostic.h"
-#include "tree-flow.h"
+#include "tree-cfg.h"
 #include "tree-pass.h"
 #include "cfgloop.h"
 #include "cgraph.h"
 #include "options.h"
+#include "context.h"
 
 #include "langhooks.h"
 
@@ -366,7 +367,7 @@ static void dump_record_type_decl(tree type) {
           }
           json_int_field("offset", int_bit_position(field));              
           if(DECL_SIZE(field)) {
-            json_int_field("size", tree_low_cst (DECL_SIZE (field), 1));
+            json_int_field("size", tree_to_uhwi (DECL_SIZE (field)));
           } else {
             json_int_field("size", 0); 
           }        
@@ -416,9 +417,9 @@ static void dump_constructor(tree node) {
 }
 
 static void dump_type(tree type) {
-  TRACE("dump_type: entering: %s\n", tree_code_name[TREE_CODE(type)]);
+  TRACE("dump_type: entering: %s\n", get_tree_code_name(TREE_CODE(type)));
   json_start_object();
-  json_string_field("type", tree_code_name[TREE_CODE(type)]);
+  json_string_field("type", get_tree_code_name(TREE_CODE(type)));
     
   if(TYPE_SIZE(type)) {
     json_int_field("size", TREE_INT_CST_LOW(TYPE_SIZE(type)));
@@ -473,7 +474,7 @@ static void dump_type(tree type) {
     
   }
   json_end_object();
-  TRACE("dump_type: exiting: %s\n", tree_code_name[TREE_CODE(type)]);
+  TRACE("dump_type: exiting: %s\n", get_tree_code_name(TREE_CODE(type)));
 }
 
 void dump_real_cst(tree op) {
@@ -482,7 +483,7 @@ void dump_real_cst(tree op) {
   memset(buf, 0, sizeof(long)*4);
 
   REAL_VALUE_TYPE r = TREE_REAL_CST(op);
-  real_to_target_fmt (buf, &r, &ieee_double_format);
+  real_to_target (buf, &r, &ieee_double_format);
 
   json_field("bits");
   fprintf(json_f, "\"%08x%08x\"", (int)buf[1], (int)buf[0]);
@@ -503,13 +504,13 @@ static void dump_op(tree op) {
   
   
     if(TREE_CODE(op)) {
-      TRACE("dump_op: code = %s\n", tree_code_name[TREE_CODE(op)]);
+      TRACE("dump_op: code = %s\n", get_tree_code_name(TREE_CODE(op)));
     } else {
       TRACE("dump_op: TREE_CODE(op) == NULL\n");
     }
     
     json_start_object();
-    json_string_field("code", tree_code_name[TREE_CODE(op)]);
+    json_string_field("code", get_tree_code_name(TREE_CODE(op)));
     
     if(TREE_CODE(op) != TREE_LIST) {
         json_field("type");
@@ -542,7 +543,7 @@ static void dump_op(tree op) {
         TRACE("field_name = %s\n", IDENTIFIER_POINTER(DECL_NAME(op)));
       }
       json_int_field("offset", int_bit_position(op));
-      json_int_field("size", tree_low_cst (DECL_SIZE (op), 1));
+      json_int_field("size", tree_to_uhwi (DECL_SIZE (op)));
       break;
       
     case CONST_DECL:
@@ -660,7 +661,7 @@ static void dump_op(tree op) {
   TRACE("dump_op: exiting\n");
 }
 
-static void dump_ops(gimple stmt) {
+static void dump_ops(gimple * stmt) {
   int numops = gimple_num_ops(stmt);
   if(numops > 0) {
     json_array_field("operands");
@@ -675,7 +676,7 @@ static void dump_ops(gimple stmt) {
   }
 }
 
-static void dump_srcref(gimple stmt) {
+static void dump_srcref(gimple * stmt) {
   json_int_field("line", gimple_lineno(stmt));
 
   if(gimple_filename(stmt)) {
@@ -683,12 +684,12 @@ static void dump_srcref(gimple stmt) {
   }
 }
 
-static void dump_assignment(gimple stmt) {
+static void dump_assignment(gimple * stmt) {
   json_start_object();
   json_string_field("type", "assign");
   dump_srcref(stmt);
 
-  json_string_field("operator", tree_code_name[gimple_assign_rhs_code(stmt)]);
+  json_string_field("operator", get_tree_code_name(gimple_assign_rhs_code(stmt)));
 
 
   json_field("lhs");
@@ -706,13 +707,13 @@ static void dump_assignment(gimple stmt) {
   json_end_object();
 }
 
-static void dump_cond(basic_block bb, gimple stmt) {
+static void dump_cond(basic_block bb, gimple * stmt) {
 
   json_start_object();
   json_string_field("type", "conditional");
   dump_srcref(stmt);
 
-  json_string_field("operator", tree_code_name[gimple_assign_rhs_code(stmt)]);
+  json_string_field("operator", get_tree_code_name(gimple_assign_rhs_code(stmt)));
   
   dump_ops(stmt);
       
@@ -724,7 +725,7 @@ static void dump_cond(basic_block bb, gimple stmt) {
   json_end_object();
  }
 
-static void dump_nop(gimple stmt) {
+static void dump_nop(gimple * stmt) {
   json_start_object();
   json_string_field("type", "nop");
   dump_srcref(stmt);
@@ -732,7 +733,7 @@ static void dump_nop(gimple stmt) {
   json_end_object();
 }
 
-static void dump_predict(gimple stmt) {
+static void dump_predict(gimple * stmt) {
   json_start_object();
   json_string_field("type", "predict");
   dump_srcref(stmt);
@@ -741,34 +742,37 @@ static void dump_predict(gimple stmt) {
   json_end_object();
 }
 
-static void dump_resx(basic_block bb, gimple stmt) {
+static void dump_resx(basic_block bb, gimple * stmt) {
   json_start_object();
   json_string_field("type", "resx");
   dump_srcref(stmt);
-  json_int_field("region", gimple_resx_region(stmt));
+  gresx *resx_stmt = as_a <gresx *> (stmt);
+  json_int_field("region", gimple_resx_region(resx_stmt));
   json_end_object();
 }
-static void dump_eh_dispatch(gimple stmt) {
+static void dump_eh_dispatch(gimple * stmt) {
   json_start_object();
   json_string_field("type", "eh_dispatch");
   dump_srcref(stmt);
-  json_int_field("region", gimple_eh_dispatch_region(stmt));
+  geh_dispatch *eh_dispatch_stmt = as_a <geh_dispatch *> (stmt);
+  json_int_field("region", gimple_eh_dispatch_region(eh_dispatch_stmt));
   json_end_object();
 }
 
-static void dump_label(gimple stmt) {
+static void dump_label(gimple * stmt) {
   json_start_object();
   json_string_field("type", "label");
   dump_srcref(stmt);
   json_end_object();
 }
 
-static void dump_return(gimple stmt) {
+static void dump_return(gimple * stmt) {
   json_start_object();
   json_string_field("type", "return");
   dump_srcref(stmt);
 
-  tree retval = gimple_return_retval(stmt);
+  greturn *return_stmt = as_a <greturn *> (stmt);
+  tree retval = gimple_return_retval(return_stmt);
   if(retval) {
     json_field("value");
     dump_op(retval);
@@ -776,7 +780,7 @@ static void dump_return(gimple stmt) {
   json_end_object();
 }
 
-static void dump_call(gimple stmt) {
+static void dump_call(gimple * stmt) {
   json_start_object();
   json_string_field("type", "call");
   dump_srcref(stmt);
@@ -799,7 +803,7 @@ static void dump_call(gimple stmt) {
   json_end_object();
 }
 
-static void dump_switch(gimple stmt) {
+static void dump_switch(gimple * stmt) {
 
   json_start_object();
 
@@ -854,7 +858,7 @@ static void dump_switch(gimple stmt) {
 
 }
 
-static void dump_statement(basic_block bb, gimple stmt) {
+static void dump_statement(basic_block bb, gimple * stmt) {
   TRACE("dump_statement: entering\n");
   
   switch(gimple_code(stmt)) {
@@ -1055,7 +1059,7 @@ static unsigned int dump_function (void)
     
   TRACE("dump_function: dumping basic blocks...\n");
   json_array_field("basicBlocks");
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     {
       dump_basic_block(bb);  
     }
@@ -1087,10 +1091,10 @@ static void dump_type_decl (void *event_data, void *data)
     json_string_field("name", IDENTIFIER_POINTER (TYPE_NAME (type)));
   }
   
-  TRACE("dump_type: type = %s\n",  tree_code_name[TREE_CODE (type)]);
+  TRACE("dump_type: type = %s\n",  get_tree_code_name(TREE_CODE (type)));
 
   
-  json_string_field("type", tree_code_name[TREE_CODE (type)]);
+  json_string_field("type", get_tree_code_name(TREE_CODE (type)));
   json_end_object();
 
   TRACE("dump_type: done\n");
@@ -1132,10 +1136,10 @@ static void dump_global_vars() {
   json_array_field("globalVariables");
     
   struct varpool_node *node;
-  node = varpool_first_variable();
-  for (node = varpool_first_variable (); node; node = varpool_next_variable (node))
+  node = symtab->first_variable();
+  for (node = symtab->first_variable (); node; node = symtab->next_variable (node))
   {
-        dump_global_var(node->symbol.decl);
+        dump_global_var(node->decl);
   }
 
   json_end_array();
@@ -1158,12 +1162,12 @@ static void dump_aliases() {
   struct cgraph_node *n;
 
   FOR_EACH_DEFINED_FUNCTION(n) {
-    if (DECL_ASSEMBLER_NAME_SET_P (n->symbol.decl)) {
+    if (DECL_ASSEMBLER_NAME_SET_P (n->decl)) {
       if(n->alias && n->thunk.alias) {
           json_start_object();
-          json_string_field("alias",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->symbol.decl)));
+          json_string_field("alias",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->decl)));
           json_string_field("definition",  IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(n->thunk.alias)));
-          json_bool_field("public", TREE_PUBLIC(n->symbol.decl));
+          json_bool_field("public", TREE_PUBLIC(n->decl));
           json_end_object();
       }
     }
@@ -1193,26 +1197,39 @@ static void finish_unit_callback (void *gcc_data, void *user_data)
   fclose(json_f);
 }
 
-static struct gimple_opt_pass dump_functions_pass =
+namespace {
+
+static struct pass_data dump_functions_pass_data =
 {
-    {
-      GIMPLE_PASS,
-      "json", 	      /* pass name */
-      OPTGROUP_NONE,  /* optinfo_flags */
-      NULL,	          /* gate */
-      dump_function,	/* execute */
-      NULL,		        /* sub */
-      NULL,		        /* next */
-      0,		          /* static_pass_number */
-      TV_NONE,	         /* tv_id */
-      PROP_cfg, /*| PROP_referenced_vars,*/   		/* properties_required */
-      0,		          /* properties_provided */
-      0,		          /* properties_destroyed */
-      0,		          /* todo_flags_start */
-      0		            /* todo_flags_finish */
-    }
+    GIMPLE_PASS,
+    "json", 	      /* pass name */
+    OPTGROUP_NONE,  /* optinfo_flags */
+    TV_NONE,	         /* tv_id */
+    PROP_cfg, /*| PROP_referenced_vars,*/   		/* properties_required */
+    0,		          /* properties_provided */
+    0,		          /* properties_destroyed */
+    0,		          /* todo_flags_start */
+    0		            /* todo_flags_finish */
 };
 
+class pass_dump_functions : public gimple_opt_pass
+{
+public:
+  pass_dump_functions (gcc::context *ctxt)
+    : gimple_opt_pass (dump_functions_pass_data, ctxt)
+  {}
+
+  virtual unsigned int execute (function *) { return dump_function(); }
+
+};
+
+} // anon namespace
+
+static gimple_opt_pass *
+make_pass_dump_plugin (gcc::context *ctxt)
+{
+  return new pass_dump_functions (ctxt);
+}
 
 /* Plugin initialization.  */
 
@@ -1222,20 +1239,22 @@ plugin_init (struct plugin_name_args *plugin_info,
 {
   struct register_pass_info pass_info;
   const char *plugin_name = plugin_info->base_name;
+  int argc = plugin_info->argc;
+  struct plugin_argument *argv = plugin_info->argv;
 
-  pass_info.pass = (struct opt_pass*)(&dump_functions_pass);
+  pass_info.pass = make_pass_dump_plugin (g);
   pass_info.reference_pass_name = "cfg";
   pass_info.ref_pass_instance_number = 1;
   pass_info.pos_op = PASS_POS_INSERT_AFTER;
-  
+
   /* find the output file */
   
   json_f = NULL;
   
   int argi;
-  for(argi=0;argi!=plugin_info->argc;++argi) {
-    if(strcmp(plugin_info->argv[argi].key, "json-output-file") == 0) {
-      json_f = fopen(plugin_info->argv[argi].value, "w");
+  for(argi=0;argi!=argc;++argi) {
+    if(strcmp(argv[argi].key, "json-output-file") == 0) {
+      json_f = fopen(argv[argi].value, "w");
     } 
   }
 
@@ -1249,13 +1268,10 @@ plugin_init (struct plugin_name_args *plugin_info,
   /* Register this new pass with GCC */
   register_callback (plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL,
                      &pass_info);
-                     
-  //register_callback (plugin_name, PLUGIN_FINISH_TYPE, &dump_type_decl, NULL);
 
-  register_callback ("start_unit", PLUGIN_START_UNIT, &start_unit_callback, NULL);
-  register_callback ("finish_unit", PLUGIN_FINISH_UNIT, &finish_unit_callback, NULL);
+  //register_callback (plugin_name, PLUGIN_FINISH_TYPE, dump_type_decl, NULL);
 
-  
+  register_callback ("start_unit", PLUGIN_START_UNIT, start_unit_callback, NULL);
+  register_callback ("finish_unit", PLUGIN_FINISH_UNIT, finish_unit_callback, NULL);
   return 0;
 }
-
