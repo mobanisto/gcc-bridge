@@ -41,6 +41,8 @@ import java.util.logging.Logger;
  */
 public class Gcc {
 
+  private String gcc = "gcc";
+
   private File workingDirectory;
   private File pluginLibrary;
 
@@ -54,19 +56,23 @@ public class Gcc {
   private File gimpleOutputDir;
 
   private boolean link = false;
-  
+
   private List<String> cFlags = Lists.newArrayList();
 
   private List<String> cxxFlags = Lists.newArrayList();
-  
+
   public Gcc() {
     workingDirectory = Files.createTempDir();
     gimpleOutputDir = workingDirectory;
   }
-  
+
   public Gcc(File workingDirectory) {
     this.workingDirectory = workingDirectory;
     gimpleOutputDir = workingDirectory;
+  }
+
+  public void setGcc(String gcc) {
+    this.gcc = gcc;
   }
 
   public void setPluginLibrary(File pluginLibrary) {
@@ -184,7 +190,7 @@ public class Gcc {
    */
   private String callGcc(List<String> arguments) throws IOException {
     List<String> command = Lists.newArrayList();
-    command.add("gcc-4.8");
+    command.add(gcc);
     command.addAll(arguments);
 
     System.err.println("EXECUTING: " + Joiner.on(" ").join(arguments));
