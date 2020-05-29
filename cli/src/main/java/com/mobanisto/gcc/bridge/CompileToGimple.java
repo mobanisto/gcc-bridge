@@ -58,7 +58,7 @@ public class CompileToGimple
             gccVersion = gccVersionArgument.parse(line.getOptionValue(OPTION_GCC_VERSION));
         }
 
-        Path pathPluginLibrary = SystemPaths.CWD.resolve("compiler/build/bridge-7.so");
+        Path pathPluginLibrary = SystemPaths.CWD.resolve("compiler/build/bridge-7/bridge.so");
 
         Path output = Paths.get(args.get(0));
         if (!Files.exists(output)) {
