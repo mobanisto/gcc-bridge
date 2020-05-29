@@ -16,7 +16,7 @@ public class CompileToGimple {
             System.exit(1);
         }
 
-        Path pathPluginLibrary = SystemPaths.CWD.resolve("compiler/build/bridge.so");
+        Path pathPluginLibrary = SystemPaths.CWD.resolve("compiler/build/bridge-7.so");
 
         Path output = Paths.get(args[0]);
         if (!Files.exists(output)) {
