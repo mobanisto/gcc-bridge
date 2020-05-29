@@ -25,15 +25,6 @@
 
 /* GCC header files.  */
 
-// --- start from dumb_plugin
-#include "config.h"
-#include "system.h"
-#include "coretypes.h"
-#include "intl.h"
-#include "toplev.h"
-#include "context.h"
-// --- end from dumb_plugin
-
 #include "gcc-plugin.h"
 #include "plugin.h"
 #include "plugin-version.h"
@@ -48,6 +39,7 @@
 #include "cfgloop.h"
 #include "cgraph.h"
 #include "options.h"
+#include "context.h"
 
 #include "langhooks.h"
 
