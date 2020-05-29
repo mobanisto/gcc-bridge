@@ -22,6 +22,8 @@ task compilePlugin(type: Exec) {
     inputs.file sourceFile
     outputs.file gccBridgePlugin
 
-    commandLine 'sh', '-c', "${gcc} -shared -xc++ -I `${gcc} -print-file-name=plugin`/include -fPIC -fno-rtti -O2 ${sourceFile} -lstdc++ -shared-libgcc -o ${gccBridgePlugin}"
+    commandLine 'sh', '-c', "${gcc} -shared -xc++ -I \
+        `${gcc} -print-file-name=plugin`/include -fPIC -fno-rtti -O2 ${sourceFile} \
+        -lstdc++ -shared-libgcc -o ${gccBridgePlugin}"
 
 }
